@@ -2,105 +2,27 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Animal Control Chaos FPV</title>
+  <title>Animal Control Reversed</title>
   <style>
     body { margin: 0; overflow: hidden; }
     canvas { display: block; }
+    #ui { position:absolute; top:0; left:0; color:white; padding:10px; font-family:sans-serif; }
   </style>
 </head>
 <body>
-<script src="https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.155.0/examples/js/controls/PointerLockControls.js"></script>
-<script>
-let scene, camera, renderer, controls, playerSpeed = 0.1;
-let animals = [];
+  <div id="ui">
+    <div id="score">Score: 0</div>
+    <div id="message"></div>
+  </div>
 
-init();
-animate();
+  <!-- Three.js and controls -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.155.0/examples/js/controls/PointerLockControls.js"></script>
 
-function init() {
-    // Scene and camera
-    scene = new THREE.Scene();
-    camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-    
-    // Renderer
-    renderer = new THREE.WebGLRenderer();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(renderer.domElement);
-    
-    // PointerLock controls (FPV)
-    controls = new THREE.PointerLockControls(camera, document.body);
-    document.body.addEventListener('click', () => { controls.lock(); });
-    scene.add(controls.getObject());
-    
-    // Floor
-    const floorGeometry = new THREE.PlaneGeometry(100, 100);
-    const floorMaterial = new THREE.MeshBasicMaterial({color: 0x228B22});
-    const floor = new THREE.Mesh(floorGeometry, floorMaterial);
-    floor.rotation.x = -Math.PI/2;
-    scene.add(floor);
-    
-    // Player starting position
-    controls.getObject().position.y = 1.6;
-    
-    // Animals
-    for (let i=0; i<5; i++) {
-        const geo = new THREE.SphereGeometry(0.5, 16, 16);
-        const mat = new THREE.MeshBasicMaterial({color: 0xff0000});
-        const animal = new THREE.Mesh(geo, mat);
-        animal.position.set(Math.random()*20-10, 0.5, Math.random()*20-10);
-        scene.add(animal);
-        animals.push(animal);
-    }
-    
-    // Keyboard movement
-    document.addEventListener('keydown', onKeyDown);
-    document.addEventListener('keyup', onKeyUp);
-    
-    window.addEventListener('resize', () => {
-        camera.aspect = window.innerWidth/window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-    });
-}
-
-let moveForward=false, moveBackward=false, moveLeft=false, moveRight=false;
-
-function onKeyDown(e){
-    if(e.code==='KeyW') moveForward=true;
-    if(e.code==='KeyS') moveBackward=true;
-    if(e.code==='KeyA') moveLeft=true;
-    if(e.code==='KeyD') moveRight=true;
-}
-
-function onKeyUp(e){
-    if(e.code==='KeyW') moveForward=false;
-    if(e.code==='KeyS') moveBackward=false;
-    if(e.code==='KeyA') moveLeft=false;
-    if(e.code==='KeyD') moveRight=false;
-}
-
-function animate() {
-    requestAnimationFrame(animate);
-    
-    // Player movement
-    const dir = new THREE.Vector3();
-    if(moveForward) dir.z -= playerSpeed;
-    if(moveBackward) dir.z += playerSpeed;
-    if(moveLeft) dir.x -= playerSpeed;
-    if(moveRight) dir.x += playerSpeed;
-    
-    controls.moveRight(dir.x);
-    controls.moveForward(dir.z);
-    
-    // Simple animal random movement
-    animals.forEach(a=>{
-        a.position.x += (Math.random()-0.5)*0.05;
-        a.position.z += (Math.random()-0.5)*0.05;
-    });
-    
-    renderer.render(scene, camera);
-}
-</script>
+  <!-- Game scripts -->
+  <script src="js/player.js"></script>
+  <script src="js/weapons.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/game.js"></script>
 </body>
 </html>
