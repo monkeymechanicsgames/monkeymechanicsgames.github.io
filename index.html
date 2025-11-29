@@ -4,68 +4,111 @@
 <meta charset="UTF-8">
 <title>Animal Control Chaos</title>
 <style>
-  body { margin:0; overflow:hidden; }
+  body { margin:0; overflow:hidden; font-family:sans-serif; }
   canvas { display:block; }
+
+  /* Start Screen */
+  #startScreen {
+    position:absolute;
+    top:0; left:0;
+    width:100%; height:100%;
+    background:#222;
+    color:white;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    z-index:10;
+  }
+  #startScreen button {
+    margin-top:20px;
+    padding:15px 30px;
+    font-size:20px;
+    cursor:pointer;
+  }
 </style>
 </head>
 <body>
+
+<!-- Start Screen -->
+<div id="startScreen">
+  <h1>Animal Control Chaos</h1>
+  <p>Click Start to enter the arena!</p>
+  <button id="startBtn">Start Game</button>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.min.js"></script>
 <script>
-  // Scene
-  const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x87ceeb);
+let scene, camera, renderer;
 
-  // Camera
-  const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-  camera.position.set(0,5,10);
-  camera.lookAt(0,0,0);
+function initArena() {
+    // Scene and camera
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x87ceeb);
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+    camera.position.set(0,5,10);
+    camera.lookAt(0,0,0);
 
-  // Renderer
-  const renderer = new THREE.WebGLRenderer({antialias:true});
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  document.body.appendChild(renderer.domElement);
-
-  // Floor
-  const floor = new THREE.Mesh(
-    new THREE.PlaneGeometry(20,20),
-    new THREE.MeshBasicMaterial({color:0x228B22})
-  );
-  floor.rotation.x = -Math.PI/2;
-  scene.add(floor);
-
-  // Obstacles
-  const obsMaterial = new THREE.MeshBasicMaterial({color:0x8B4513});
-  for(let i=0;i<5;i++){
-    const obs = new THREE.Mesh(
-      new THREE.BoxGeometry(2,2,2),
-      obsMaterial
-    );
-    obs.position.set(Math.random()*10-5,1,Math.random()*10-5);
-    scene.add(obs);
-  }
-
-  // Player cube
-  const player = new THREE.Mesh(
-    new THREE.BoxGeometry(1,1,1),
-    new THREE.MeshBasicMaterial({color:0xff0000})
-  );
-  player.position.set(0,0.5,0);
-  scene.add(player);
-
-  // Animate
-  function animate(){
-    requestAnimationFrame(animate);
-    player.rotation.y += 0.01; // just spin so we see movement
-    renderer.render(scene,camera);
-  }
-  animate();
-
-  // Resize
-  window.addEventListener('resize', ()=>{
-    camera.aspect = window.innerWidth/window.innerHeight;
-    camera.updateProjectionMatrix();
+    // Renderer
+    renderer = new THREE.WebGLRenderer({antialias:true});
     renderer.setSize(window.innerWidth, window.innerHeight);
-  });
+    document.body.appendChild(renderer.domElement);
+
+    // Floor
+    const floor = new THREE.Mesh(
+      new THREE.PlaneGeometry(20,20),
+      new THREE.MeshBasicMaterial({color:0x228B22})
+    );
+    floor.rotation.x = -Math.PI/2;
+    scene.add(floor);
+
+    // Obstacles
+    const obsMaterial = new THREE.MeshBasicMaterial({color:0x8B4513});
+    for(let i=0;i<5;i++){
+      const obs = new THREE.Mesh(
+        new THREE.BoxGeometry(2,2,2),
+        obsMaterial
+      );
+      obs.position.set(Math.random()*10-5,1,Math.random()*10-5);
+      scene.add(obs);
+    }
+
+    // Player cube
+    const player = new THREE.Mesh(
+      new THREE.BoxGeometry(1,1,1),
+      new THREE.MeshBasicMaterial({color:0xff0000})
+    );
+    player.position.set(0,0.5,0);
+    scene.add(player);
+
+    animate();
+}
+
+function animate(){
+    requestAnimationFrame(animate);
+    // spin player cube for now
+    scene.children.forEach(c => {
+        if(c.geometry && c.geometry.type === "BoxGeometry" && c.material.color.getHex() === 0xff0000){
+            c.rotation.y += 0.01;
+        }
+    });
+    renderer.render(scene,camera);
+}
+
+// Resize
+window.addEventListener('resize', ()=>{
+    if(camera && renderer){
+        camera.aspect = window.innerWidth/window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+});
+
+// Start Button
+document.getElementById('startBtn').addEventListener('click', ()=>{
+    document.getElementById('startScreen').style.display='none';
+    initArena();
+});
 </script>
 </body>
 </html>
